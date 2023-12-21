@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Bash script that displays Best School 10 times.
 
-mystr="Best School"
 for ((i=0; i<10; i++)); do
-    echo "$mystr"
+    echo "Best School"
 done
