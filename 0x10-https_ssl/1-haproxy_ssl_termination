@@ -33,19 +33,19 @@ defaults
         errorfile 503 /etc/haproxy/errors/503.http
         errorfile 504 /etc/haproxy/errors/504.http
 
-frontend clickviral-frontend
+frontend haproxy_balancer
         bind *:80
         mode http
         http-request redirect scheme https code 301 unless { ssl_fc }
         http-request set-header X_Forwarded-Proto http
-        default_backend clickviral-backend
+        default_backend webservers
 
-frontend clickviral-frontend-https
+frontend webservers-https
         bind *:443 ssl crt /etc/haproxy/certs/www.youssef-chibane.tech.pem
         http-request set-header X-Forwarded-Proto https
-        default_backend clickviral-backend
+        default_backend webservers
 
-backend clickviral-backend
-        balance roundrobin
-        server 428409-web-01 100.25.190.21:80 check
-        server 428409-web-02 54.160.77.90:80 check
+backend webservers
+    balance roundrobin
+    server 428409-web-01 54.157.128.252:80 check
+    server 428409-web-02 54.89.178.220:80 check
