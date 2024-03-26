@@ -1,18 +1,39 @@
 #!/usr/bin/python3
-"""Exports to-do list information of all employees to JSON format."""
+"""
+Return information for a given employee ID.
+
+About his/her TODO list progress from a REST API.
+"""
+
 import json
+
 import requests
 
-if __name__ == "__main__":
-    url = "https://jsonplaceholder.typicode.com/"
-    users = requests.get(url + "users").json()
 
-    with open("todo_all_employees.json", "w") as jsonfile:
-        json.dump({
-            u.get("id"): [{
-                "task": t.get("title"),
-                "completed": t.get("completed"),
-                "username": u.get("username")
-            } for t in requests.get(url + "todos",
-                                    params={"userId": u.get("id")}).json()]
-            for u in users}, jsonfile)
+def save_data_to_json():
+    data = {}
+    for id in range(1, 11):
+        req = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                           .format(id))
+        user = req.json()
+        req = requests.get(
+            "https://jsonplaceholder.typicode.com/users/{}/todos".format(id)
+        )
+        todos = req.json()
+        task_list = []
+        for todo in todos:
+            task = {
+                "username": user["username"],
+                "task": todo["title"],
+                "completed": todo["completed"],
+            }
+            task_list.append(task)
+        data[str(user["id"])] = task_list
+
+    filename = "todo_all_employees.json"
+    with open(filename, "w") as file:
+        json.dump(data, file)
+
+
+if __name__ == "__main__":
+    save_data_to_json()
