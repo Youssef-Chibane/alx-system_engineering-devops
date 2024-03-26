@@ -1,18 +1,32 @@
 #!/usr/bin/python3
-"""Exports to-do list information for a given employee ID to CSV format."""
+"""
+Return information for a given employee ID.
+
+About his/her TODO list progress from a REST API.
+"""
+
 import csv
+from sys import argv
+
 import requests
-import sys
+
+
+def fetch_data(id):
+    req = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                       .format(id))
+    user = req.json()
+
+    req = requests.get("https://jsonplaceholder.typicode.com/users/{}/todos"
+                       .format(id))
+    todos = req.json()
+
+    filename = "{}.csv".format(user["id"])
+    with open(filename, "w") as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+        for todo in todos:
+            writer.writerow([user["id"], user["username"],
+                            todo["completed"], todo["title"]])
+
 
 if __name__ == "__main__":
-    user_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/"
-    user = requests.get(url + "users/{}".format(user_id)).json()
-    username = user.get("username")
-    todos = requests.get(url + "todos", params={"userId": user_id}).json()
-
-    with open("{}.csv".format(user_id), "w", newline="") as csvfile:
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        [writer.writerow(
-            [user_id, username, t.get("completed"), t.get("title")]
-         ) for t in todos]
+    fetch_data(argv[1])
