@@ -1,19 +1,38 @@
 #!/usr/bin/python3
-"""Exports to-do list information for a given employee ID to JSON format."""
+"""
+Return information for a given employee ID.
+
+About his/her TODO list progress from a REST API.
+"""
+
 import json
+from sys import argv
+
 import requests
-import sys
+
+
+def fetch_data(id):
+    req = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                       .format(id))
+    user = req.json()
+
+    req = requests.get("https://jsonplaceholder.typicode.com/users/{}/todos"
+                       .format(id))
+    todos = req.json()
+    task_list = []
+    for todo in todos:
+        task = {
+            "task": todo["title"],
+            "completed": todo["completed"],
+            "username": user["username"],
+        }
+        task_list.append(task)
+
+    data = {str(user["id"]): task_list}
+    filename = "{}.json".format(user["id"])
+    with open(filename, "w") as file:
+        json.dump(data, file)
+
 
 if __name__ == "__main__":
-    user_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/"
-    user = requests.get(url + "users/{}".format(user_id)).json()
-    username = user.get("username")
-    todos = requests.get(url + "todos", params={"userId": user_id}).json()
-
-    with open("{}.json".format(user_id), "w") as jsonfile:
-        json.dump({user_id: [{
-                "task": t.get("title"),
-                "completed": t.get("completed"),
-                "username": username
-            } for t in todos]}, jsonfile)
+    fetch_data(argv[1])
